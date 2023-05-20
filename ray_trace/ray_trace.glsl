@@ -1,4 +1,4 @@
-#include "../sdf/sdf.glsl"
+#include "sdf.glsl"
 
 struct ray
 {

@@ -1,5 +1,5 @@
 #iKeyboard
-#include "hash.glsl"
+#include "random/hash.glsl"
 
 // map fragment coordinates to world coordinates
 vec2 frag2World(in vec2 frag) {

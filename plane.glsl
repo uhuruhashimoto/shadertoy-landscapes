@@ -1,19 +1,20 @@
-#include "sdfs/sdf.glsl"
 #include "ray_trace/ray_trace.glsl"
 #include "common.glsl"
 
 #define GRID 1
 #define COST 2
+#define RAY_MARCHING 3
+#define SPHERE_TRACING 4
 int cost_norm = 300;
 
 struct settings
 {
-    int sdf_func;      // Which primitive is being visualized (e.g. SPHERE, BOX, etc.)
     int shade_mode;    // How the primiive is being visualized (GRID or COST)
     int marching_type; // Should we use RAY_MARCHING or SPHERE_TRACING?
-    int task_world;    // Which task is being rendered (TASK3 or TASK4)?
-    float anim_speed;  // Specifies the animation speed
 };
+
+
+settings setts = settings(GRID, RAY_MARCHING);
 
 vec3 shade(vec3 p, int iters, settings setts)
 {
@@ -47,7 +48,7 @@ vec3 render(settings setts)
     // render the progress bar if need be
     if (p.y < -0.95)
     {
-        float val = cos(iTime * setts.anim_speed);
+        float val = cos(iTime);
         return shade_progress_bar(p, iResolution.xy, val);
     }
 
@@ -76,19 +77,8 @@ vec3 render(settings setts)
     bool hit;
 
     // evaluate the specified rendering method and shade appropriately
-    if ((setts.marching_type == RAY_MARCHING) || (setts.marching_type == NONE))
-    {
-        if (ray_march(r, step_size, max_iter, setts, hit_loc, iters))
-        {
-            col = shade(hit_loc, iters, setts);
-        }
-    }
-    else if (setts.marching_type == SPHERE_TRACING)
-    {
-        if (sphere_tracing(r, max_iter, setts, hit_loc, iters))
-        {
-            col = shade(hit_loc, iters, setts);
-        }
+    if (ray_march(r, step_size, max_iter, hit_loc, iters)) {
+        col = shade(hit_loc, iters, setts);
     }
 
     return pow(col, vec3(1.0 / 2.2));
@@ -96,15 +86,7 @@ vec3 render(settings setts)
 
 void main()
 {
-    gl_FragColor = vec4(vec3(1.0, 0, 0), 1.0);
-    // vec2 uvw = gl_FragCoord.xy / iResolution.xy;
+    vec2 uvw = gl_FragCoord.xy / iResolution.xy;
+    gl_FragColor = vec4(render(setts), 1.0);
 
-    // if (uvw.x < 0.5)
-    // {
-    //     gl_FragColor = vec4(render(left_settings), 1.0);
-    // }
-    // else
-    // {
-    //     gl_FragColor = vec4(render(right_settings), 1.0);
-    // }
 }
