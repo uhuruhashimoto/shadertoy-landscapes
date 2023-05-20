@@ -1,5 +1,4 @@
 #include "ray_trace/ray_trace.glsl"
-#include "common.glsl"
 
 #define GRID 1
 #define COST 2
@@ -44,13 +43,6 @@ vec3 render(settings setts)
     // get the location on the screen in [-1,1] space after
     // accounting for the aspect ratio
     vec2 p = (2.0 * gl_FragCoord.xy - iResolution.xy) / iResolution.y;
-
-    // render the progress bar if need be
-    if (p.y < -0.95)
-    {
-        float val = cos(iTime);
-        return shade_progress_bar(p, iResolution.xy, val);
-    }
 
     float aspect = iResolution.x / iResolution.y;
     vec2 uv = gl_FragCoord.xy / iResolution.xy - 0.5;

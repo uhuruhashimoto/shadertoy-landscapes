@@ -173,7 +173,7 @@ float sdPlane(vec3 p, float z)
 
 float world_sdf(vec3 p)
 {
-    return sdPlane(p.xyz, -0.3);
+    return sdPlane(p, 0.f);
 }
 
 
