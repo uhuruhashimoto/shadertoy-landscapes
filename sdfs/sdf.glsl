@@ -5,8 +5,6 @@ float sdSphere(vec3 p, float r)
     return length(p) - r;
 }
 
-
-
 // Returns the signed distance to a line segment.
 //
 // p is the position you are evaluating the distance to.
@@ -25,7 +23,6 @@ float sdLine(in vec2 p, in vec2 a, in vec2 b)
     }
     return length(proj);
 }
-
 
 // Returns the signed distance from position p to an axis-aligned box centered at the origin with half-length,
 // half-height, and half-width specified by half_bounds
@@ -172,4 +169,27 @@ float opRound(float d, float iso)
 float sdPlane(vec3 p, float z)
 {
     return p.y - z;
+}
+
+float world_sdf(vec3 p)
+{
+    return sdPlane(p.xyz, -0.3);
+}
+
+
+vec3 computeNormal(vec3 p)
+{
+
+// ################ Edit your code below ################
+
+    const float h = 1e-5;
+    const vec2 d10 = vec2(1, 0);
+    float sdp = world_sdf(p);
+    vec3 px = p + h * d10.xyy;
+    vec3 py = p + h * d10.yxy;
+    vec3 pz = p + h * d10.yyx;
+    float x = world_sdf(px);
+    float y = world_sdf(py);
+    float z = world_sdf(pz);
+    return normalize(vec3(x - sdp, y - sdp, z - sdp));
 }
