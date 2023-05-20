@@ -1,4 +1,4 @@
-#iKeyboard
+// #iKeyboard
 #include "random/hash.glsl"
 
 // map fragment coordinates to world coordinates
@@ -10,10 +10,11 @@ vec2 frag2World(in vec2 frag) {
 float falloff(float t) {
   float t2 = clamp(abs(t), 0.0, 1.0);
 
-  if (isKeyToggled(Key_C))
-    return 1.0 - smoothstep(0.0, 1.0, t2);
-  else
-    return 1.0 - t2;
+  // if (isKeyToggled(Key_C))
+  //   return 1.0 - smoothstep(0.0, 1.0, t2);
+  // else
+  //   return 1.0 - t2;
+  return 1.0 - smoothstep(0.0, 1.0, t2);
 }
 
 vec2 grad(vec2 center) {
@@ -26,7 +27,8 @@ float bump(vec2 p, vec2 center)
 {
   vec2 offset = p - center;
 
-  float v = isKeyToggled(Key_V) ? 2. * hash12(center) - 1. : dot(offset, grad(center));
+  //float v = isKeyToggled(Key_V) ? 2. * hash12(center) - 1. : dot(offset, grad(center));
+  float v = dot(offset, grad(center));
 
   return falloff(p.x - center.x) * falloff(p.y - center.y) * v;
 }
@@ -45,15 +47,15 @@ float snoise(vec2 p) {
   return result;
 }
 
-void main() {
-  vec2 p = frag2World(gl_FragCoord.xy);
+// void main() {
+//   vec2 p = frag2World(gl_FragCoord.xy);
 
-  float f = snoise(p);
-  f = 0.5 + 0.5 * f;
-  gl_FragColor = vec4(vec3(f), 1.0);
+//   float f = snoise(p);
+//   f = 0.5 + 0.5 * f;
+//   gl_FragColor = vec4(vec3(f), 1.0);
 
-  // draw integer grid
-  if (isKeyToggled(Key_L))
-    if (abs(fract(p.x)) < dFdx(p.x) || abs(fract(p.y)) < dFdy(p.y))
-      gl_FragColor = vec4(1, 0, 0, 1);
-}
+//   // draw integer grid
+//   if (isKeyToggled(Key_L))
+//     if (abs(fract(p.x)) < dFdx(p.x) || abs(fract(p.y)) < dFdy(p.y))
+//       gl_FragColor = vec4(1, 0, 0, 1);
+// }

@@ -1,4 +1,5 @@
 #include "ray_trace/ray_trace.glsl"
+#include "perlin.glsl"
 
 #define GRID 1
 #define COST 2
@@ -52,7 +53,7 @@ vec3 render(settings setts)
     vec3 dir = vec3(0.3, 0.0, 0.3) - eye;
     vec3 up = vec3(0, 1, 0);
 
-    float focal_length = 4.;
+    float focal_length = 1.;
 
     vec3 u, v, w;
     compute_camera_frame(dir, up, u, v, w);
@@ -70,6 +71,8 @@ vec3 render(settings setts)
 
     // evaluate the specified rendering method and shade appropriately
     if (ray_march(r, step_size, max_iter, hit_loc, iters)) {
+        float f = snoise(hit_loc.xz);
+        hit_loc.y += f;
         col = shade(hit_loc, iters, setts);
     }
 
