@@ -2,7 +2,7 @@
 #include "perlin.glsl"
 
 #define GRID 1
-#define COST 2
+#define DIFFUSE 2
 #define RAY_MARCHING 3
 #define SPHERE_TRACING 4
 int cost_norm = 300;
@@ -18,9 +18,7 @@ settings setts = settings(GRID, RAY_MARCHING);
 
 vec3 shade(vec3 p, int iters, settings setts)
 {
-    // we will give them the grid shade mode
-    if (setts.shade_mode == GRID)
-    {
+    if (setts.shade_mode == GRID) {
         float res = 0.2;
         float one = abs(mod(p.x, res) - res / 2.0);
         float two = abs(mod(p.y, res) - res / 2.0);
@@ -29,12 +27,19 @@ vec3 shade(vec3 p, int iters, settings setts)
 
         return mix(vec3(0.2, 0.5, 1.0), vec3(0.1, 0.1, 0.1), smoothstep(0.0, 0.05, abs(interp)));
     }
-    else if (setts.shade_mode == COST)
-    {
-        return vec3(float(iters) / float(cost_norm));
+    else if (setts.shade_mode == DIFFUSE) {
+        vec3 light_pos = vec3(0.0, 5.0, 0.0);
+        vec3 light_intensity = vec3(5.0);
+        vec3 surface_color = vec3(0.5);
+        vec3 l = normalize(light_pos - p);
+        vec3 n = computeNormal(p);
+        float distance = length(light_pos - p);
+        float costheta = max(dot(n, l), 0.0);
+        float attentuation = 1.0 / (distance * distance);
+        surface_color = costheta * attentuation * light_intensity * surface_color;
+        return surface_color;
     }
-    else
-    {
+    else {
         return vec3(0.0);
     }
 }
