@@ -1,3 +1,4 @@
+#iKeyboard
 #include "ray_trace.glsl"
 #include "random/perlin.glsl"
 #include "sdfs/sdf.glsl"
@@ -9,8 +10,6 @@ struct settings
     int shade_mode;    // How the primiive is being visualized (GRID or COST)
 };
 
-
-settings setts = settings(GRID);
 
 vec3 shade(vec3 p, settings setts)
 {
@@ -40,7 +39,7 @@ vec3 shade(vec3 p, settings setts)
     }
 }
 
-vec3 render(settings setts)
+vec3 render()
 {
     // get the location on the screen in [-1,1] space after
     // accounting for the aspect ratio
@@ -66,10 +65,10 @@ vec3 render(settings setts)
     float t;
 
     if (castRay(r, t)) {
-        hit_loc = r.origin + r.direction * t;
-        float f = snoise(hit_loc.xz);
-        hit_loc.y += f;
-        col = shade(hit_loc, setts);
+        col = terrainColor(r, t);
+        if (isKeyToggled(Key_L)) {
+            col = shade(vec3(r.origin + r.direction * t), settings(GRID));
+        }
     }
 
     return pow(col, vec3(1.0 / 2.2));
@@ -77,6 +76,6 @@ vec3 render(settings setts)
 
 void main()
 {
-    gl_FragColor = vec4(render(setts), 1.0);
+    gl_FragColor = vec4(render(), 1.0);
 
 }

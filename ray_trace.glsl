@@ -2,6 +2,7 @@
 
 #include "random/random.glsl"
 #include "common.glsl"
+#include "random/perlin.glsl"
 
 // ---------------------- CAMERA ------------------------ //
 ray cameraGenerateRay(vec2 uv, vec3 eye, camera cam, float focal_length)
@@ -24,7 +25,8 @@ vec3 skyColor() {
 
 // plane height
 float f(float x, float z) {
-    return 2.0;
+    return 1.+0.5*snoise(vec2(x,z));
+    //return 0.5 * sin(x)*sin(z);
 }
 
 // The normal can be computed as usual with the central differences method:
@@ -47,7 +49,7 @@ vec3 getMaterial(vec3 p, vec3 n)
 
 vec3 applyFog(vec3 p, float t)
 {
-    return vec3(1.0, 0.0, 0.0);
+    return vec3(1.0, 0, 0);
 }
 
 vec3 terrainColor( const ray r, float t )
@@ -60,7 +62,7 @@ vec3 terrainColor( const ray r, float t )
 }
 
 // ---------------------- RAY TRACE ------------------------ //
-bool castRay(ray r, inout float resT )
+bool castRay(ray r, inout float resT)
 {
     float dt = 0.01f;
     const float mint = 0.001f;
