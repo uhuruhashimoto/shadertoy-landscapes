@@ -1,5 +1,6 @@
-// #iKeyboard
-#include "random/hash.glsl"
+
+//#iKeyboard
+#include "hash.glsl"
 
 // map fragment coordinates to world coordinates
 vec2 frag2World(in vec2 frag) {
@@ -9,11 +10,6 @@ vec2 frag2World(in vec2 frag) {
 
 float falloff(float t) {
   float t2 = clamp(abs(t), 0.0, 1.0);
-
-  // if (isKeyToggled(Key_C))
-  //   return 1.0 - smoothstep(0.0, 1.0, t2);
-  // else
-  //   return 1.0 - t2;
   return 1.0 - smoothstep(0.0, 1.0, t2);
 }
 
