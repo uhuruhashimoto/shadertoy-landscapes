@@ -24,7 +24,7 @@ vec3 skyColor() {
 
 // plane height
 float f(float x, float z) {
-    return -4.0;
+    return 2.0;
 }
 
 // The normal can be computed as usual with the central differences method:
@@ -110,7 +110,7 @@ void main()
 
     // Camera
     camera cam;
-    vec3 eye = vec3(-2, 2, 1);
+    vec3 eye = vec3(-30, 2, 1);
     vec3 up = vec3(0, 1, 0);
     vec3 dir = vec3(0.0, 0.0, -1.0) - eye;
     cameraCoords(dir, up, cam);
