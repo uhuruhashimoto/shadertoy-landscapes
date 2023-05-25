@@ -22,6 +22,11 @@ vec3 skyColor() {
     return vec3(0.0, 0.0, 0.3);
 }
 
+// plane height
+float f(float x, float z) {
+    return -4.0;
+}
+
 // The normal can be computed as usual with the central differences method:
 vec3 getNormal( const vec3 p )
 {
@@ -65,7 +70,7 @@ bool castRay(ray r, inout float resT )
     for( float t = mint; t < maxt; t += dt )
     {
         vec3  p = r.origin + r.direction*t;
-        float h = f( p.xz );
+        float h = f( p.x, p.z );
         if( p.y < h )
         {
             // interpolate the intersection distance
@@ -80,15 +85,11 @@ bool castRay(ray r, inout float resT )
     return false;
 }
 
-vec3 rayColor(ray r, int max_depth)
+vec3 rayColor(ray r)
 {
-    int i = 0;
-    while (i < max_depth) {
-        float t;
-        if (castRay(r, t)) {
-            return terrainColor(r, t);
-        }
-        i++;
+    float t;
+    if (castRay(r, t)) {
+        return terrainColor(r, t);
     }
     return skyColor();
 }
@@ -98,7 +99,6 @@ void main()
 {
     // Aliasing
     int num_samples = 1;
-    int max_depth = 20;
     vec3 result = vec3(0.);
 
     // scattering
@@ -119,7 +119,7 @@ void main()
         float randseed = rand1(g_seed);
         vec2 randuv = vec2(uv.x + randseed / iResolution.x, uv.y + randseed / iResolution.y);
         ray r = cameraGenerateRay(randuv, eye, cam, focal_length);
-        vec3 col = rayColor(r, max_depth);
+        vec3 col = rayColor(r);
         result = result + col;
     }
 
