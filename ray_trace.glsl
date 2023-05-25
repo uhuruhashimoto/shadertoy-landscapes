@@ -95,37 +95,37 @@ vec3 rayColor(ray r)
 }
 
 // --------------------- DRIVER -------------------------- //
-void main()
-{
-    // Aliasing
-    int num_samples = 1;
-    vec3 result = vec3(0.);
+// void main()
+// {
+//     // Aliasing
+//     int num_samples = 1;
+//     vec3 result = vec3(0.);
 
-    // scattering
-    init_rand(gl_FragCoord.xy, float(iTime));
+//     // scattering
+//     init_rand(gl_FragCoord.xy, float(iTime));
 
-    // Image
-    vec2 uv = gl_FragCoord.xy / iResolution.xy - 0.5;
-    float focal_length = 4.;
+//     // Image
+//     vec2 uv = gl_FragCoord.xy / iResolution.xy - 0.5;
+//     float focal_length = 4.;
 
-    // Camera
-    camera cam;
-    vec3 eye = vec3(-30, 2, 1);
-    vec3 up = vec3(0, 1, 0);
-    vec3 dir = vec3(0.0, 0.0, -1.0) - eye;
-    cameraCoords(dir, up, cam);
+//     // Camera
+//     camera cam;
+//     vec3 eye = vec3(-30, 2, 1);
+//     vec3 up = vec3(0, 1, 0);
+//     vec3 dir = vec3(0.0, 0.0, -1.0) - eye;
+//     cameraCoords(dir, up, cam);
 
-    for (int i=0; i<num_samples; i++) {
-        float randseed = rand1(g_seed);
-        vec2 randuv = vec2(uv.x + randseed / iResolution.x, uv.y + randseed / iResolution.y);
-        ray r = cameraGenerateRay(randuv, eye, cam, focal_length);
-        vec3 col = rayColor(r);
-        result = result + col;
-    }
+//     for (int i=0; i<num_samples; i++) {
+//         float randseed = rand1(g_seed);
+//         vec2 randuv = vec2(uv.x + randseed / iResolution.x, uv.y + randseed / iResolution.y);
+//         ray r = cameraGenerateRay(randuv, eye, cam, focal_length);
+//         vec3 col = rayColor(r);
+//         result = result + col;
+//     }
 
-    result = result / float(num_samples);
-    result = pow(result, vec3(1.0/2.2));
+//     result = result / float(num_samples);
+//     result = pow(result, vec3(1.0/2.2));
 
-    gl_FragColor = vec4(result, 1.0);
+//     gl_FragColor = vec4(result, 1.0);
 
-}
+// }
