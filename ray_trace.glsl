@@ -15,37 +15,11 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
     cam.w = -normalize(dir);
     cam.u = normalize(cross(up, cam.w));
     cam.v = cross(cam.w, cam.u);
-    cam.w = 0.5*cam.w;
 }
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
-void renderImage( vec3 image )
-{
-    for( int j=0; j < yres; j++ ) {
-        for( int i=0; i < xres; i++ ) {
-            ray r = generateRayForPixel( i, j );
-            float t;
-            if (castRay( r, t )) {
-                image[xres*j+i] = terrainColor( r, t );
-            }
-            else {
-                image[xres*j+i] = skyColor();
-            }
-        }
-    }
-}
-
 vec3 skyColor() {
     return vec3(0.0, 0.0, 0.3);
-}
-
-vec3 terrainColor( const ray r, float t )
-{
-    const vec3 p = r.origin + r.direction * t;
-    const vec3 n = getNormal( p );
-    const vec3 s = getShading( p, n );
-    const vec3 m = getMaterial( p, n );
-    return applyFog( m * s, t );
 }
 
 // The normal can be computed as usual with the central differences method:
@@ -71,6 +45,15 @@ vec3 applyFog(vec3 p, float t)
     return vec3(1.0, 0.0, 0.0);
 }
 
+vec3 terrainColor( const ray r, float t )
+{
+    vec3 p = r.origin + r.direction * t;
+    vec3 n = getNormal( p );
+    vec3 s = getShading( p, n );
+    vec3 m = getMaterial( p, n );
+    return applyFog( m * s, t );
+}
+
 // ---------------------- RAY TRACE ------------------------ //
 bool castRay(ray r, inout float resT )
 {
@@ -81,8 +64,8 @@ bool castRay(ray r, inout float resT )
     float ly = 0.0f;
     for( float t = mint; t < maxt; t += dt )
     {
-        const vec3  p = r.origin + r.direction*t;
-        const float h = f( p.xz );
+        vec3  p = r.origin + r.direction*t;
+        float h = f( p.xz );
         if( p.y < h )
         {
             // interpolate the intersection distance
@@ -95,6 +78,19 @@ bool castRay(ray r, inout float resT )
         ly = p.y;
     }
     return false;
+}
+
+vec3 rayColor(ray r, int max_depth)
+{
+    int i = 0;
+    while (i < max_depth) {
+        float t;
+        if (castRay(r, t)) {
+            return terrainColor(r, t);
+        }
+        i++;
+    }
+    return skyColor();
 }
 
 // --------------------- DRIVER -------------------------- //
@@ -123,7 +119,7 @@ void main()
         float randseed = rand1(g_seed);
         vec2 randuv = vec2(uv.x + randseed / iResolution.x, uv.y + randseed / iResolution.y);
         ray r = cameraGenerateRay(randuv, eye, cam, focal_length);
-        vec3 col = ray_color(r, max_depth);
+        vec3 col = rayColor(r, max_depth);
         result = result + col;
     }
 
