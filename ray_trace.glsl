@@ -25,7 +25,7 @@ vec3 skyColor() {
 
 // plane height
 float f(float x, float z) {
-    //return 1.+0.5*snoise(vec2(x,z));
+    return 0.35*snoise(vec2(x,z));
     return 0.5 * sin(x)*sin(z);
 }
 
