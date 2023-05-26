@@ -25,8 +25,8 @@ vec3 skyColor() {
 
 // plane height
 float f(float x, float z) {
-    return 1.+0.5*snoise(vec2(x,z));
-    //return 0.5 * sin(x)*sin(z);
+    //return 1.+0.5*snoise(vec2(x,z));
+    return 0.5 * sin(x)*sin(z);
 }
 
 // The normal can be computed as usual with the central differences method:
