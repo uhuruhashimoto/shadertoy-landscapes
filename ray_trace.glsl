@@ -30,15 +30,16 @@ float fbm( in vec2 x, in float H )
     float f = 1.0;
     float a = 1.0;
     float t = 0.0;
-    int numOctaves = 5;
+    int numOctaves = 1;
     for( int i=0; i<numOctaves; i++ )
     {
-        t += a*snoise(f*x.x);
+        t += a*snoise(f*x);
         f *= 2.0;
         a *= G;
     }
     return t;
 }
+
 
 // plane height
 float f(float x, float z) {
