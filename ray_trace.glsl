@@ -39,17 +39,20 @@ vec3 getNormal( const vec3 p )
 
 vec3 getShading(vec3 p, vec3 n)
 {
-    return vec3(0.0);
+    // sun
+    vec3 s = vec3(1, 0.5, 0);
+    return vec3(dot(n, s));
 }
 
 vec3 getMaterial(vec3 p, vec3 n)
 {
-    return vec3(0.0);
+    return vec3(1.0, 0.5, 0.2);
 }
 
 vec3 applyFog(vec3 p, float t)
 {
-    return vec3(1.0, 0, 0);
+    // no fog yet
+    return p;
 }
 
 vec3 terrainColor( const ray r, float t )
