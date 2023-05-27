@@ -1,4 +1,3 @@
-#iKeyboard
 #define EPSILON 1e-3
 #define MAX_FLOAT 3.402823466e+38
 #define MAX_RECURSION 50
@@ -21,6 +20,7 @@ struct camera {
     vec3 w;
 };
 
+// ---------------------- RANDOMNESS ------------------------ //
 vec2 hash( vec2 p ) // replace this by something better
 {
 	p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
@@ -43,7 +43,7 @@ float noise( in vec2 p )
     return dot( n, vec3(70.0) );
 }
 
-
+// ---------------------- CAMERA ------------------------ //
 ray cameraGenerateRay(vec2 uv, vec3 eye, camera cam, float focal_length)
 {
     vec3 dir = -focal_length * cam.w + uv.x * cam.u + uv.y * cam.v;
@@ -82,9 +82,7 @@ float fbm( in vec2 x, in float H )
 
 // plane height
 float f(float x, float z) {
-    //return fbm(vec2(x,z), 1.);
-    //return snoise(vec2(x,z));
-    return 0.5 * sin(x)*sin(z);
+    return fbm(vec2(x,z), 1.);
 }
 
 // The normal can be computed as usual with the central differences method:
@@ -212,16 +210,13 @@ vec3 render()
 
     if (castRay(r, t)) {
         col = terrainColor(r, t);
-        if (isKeyToggled(Key_L)) {
-            col = shade(vec3(r.origin + r.direction * t), settings(GRID));
-        }
     }
 
     return pow(col, vec3(1.0 / 2.2));
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void mainImage(out vec4 fragColor, in vec2 fragCoord )
 {
-    gl_FragColor = vec4(vec3(1.0, 0, 0), 1.0);
+    fragColor = vec4(render(), 1.0);
 
 }
