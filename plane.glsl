@@ -62,7 +62,7 @@ vec3 render()
     vec2 uv = gl_FragCoord.xy / iResolution.xy - 0.5;
     uv.x *= aspect;
     float dist = abs(gl_FragCoord.y - p.y);
-   
+
 
 
 

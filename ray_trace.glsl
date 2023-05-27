@@ -2,7 +2,7 @@
 #include "random/perlin.glsl"
 #include "random/random.glsl"
 #include "common.glsl"
-#iChannel0 'Mountain_2__mp.jpg'
+#iChannel0 'figures/mountain.jpg'
 
 // ---------------------- CAMERA ------------------------ //
 ray cameraGenerateRay(vec2 uv, vec3 eye, camera cam, float focal_length)

@@ -1,13 +1,13 @@
-#iChannel0 'Mountain_2__mp.jpg'
+#iChannel0 'figures/mountain.jpg'
 mat2 rot2D(float theta)
 {
     return mat2(cos(theta), sin(theta), -sin(theta), cos(theta));
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void main()
 {
 	// convert from pixel space to homogenous coordinate (-1 to 1 on each axis)
-	vec2 p = -1.0 + 2.0*fragCoord.xy/iResolution.xy;
+	vec2 p = -1.0 + 2.0*gl_FragCoord.xy/iResolution.xy;
 
     mat2 mRot = rot2D(iTime);
     
@@ -44,12 +44,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 		// mapping this to meaningful 2D UVs depends on the plane
 		// we use X and Y as we intersect with Z, if the plane normal were 0,1,0 we'd use X and Z
 		vec2 uv = hit.xy;
-		fragColor = texture(iChannel0, uv);
+		gl_FragColor = texture(iChannel0, uv);
 	}
 	else
 	{
 		// no intersection
-		fragColor = vec4(0.0, 0.0, 0.0, 1.0);
+		gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 	}
 	
 	// now, how to run this on older hardware?
