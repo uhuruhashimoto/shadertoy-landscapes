@@ -1,13 +1,14 @@
 #iKeyboard
 #include "ray_trace.glsl"
-#include "random/perlin.glsl"
+//#include "random/perlin.glsl"
 #include "sdfs/sdf.glsl"
+
 
 #define GRID 1
 #define DIFFUSE 2
 struct settings
 {
-    int shade_mode;    // How the primiive is being visualized (GRID or COST)
+    int shade_mode; // How the prximiive is being visualized (GRID or COST)
 };
 
 
@@ -39,6 +40,17 @@ vec3 shade(vec3 p, settings setts)
     }
 }
 
+// #define sat(v) clamp(v,0.,1.)
+
+// float clouds(vec3 p)
+// {
+// 	float res = noise(p * 4.) * 2.;
+//     p.y -= iTime * .02;
+//     res -= noise(p * 11.);
+
+//     return sat(res * 4. * (1. - res));
+// }
+
 vec3 render()
 {
     // get the location on the screen in [-1,1] space after
@@ -49,9 +61,13 @@ vec3 render()
     float aspect = iResolution.x / iResolution.y;
     vec2 uv = gl_FragCoord.xy / iResolution.xy - 0.5;
     uv.x *= aspect;
+    float dist = abs(gl_FragCoord.y - p.y);
+   
+
+
 
     // Camera
-    vec3 eye = vec3(-3.0, 2.6, -3.0);
+    vec3 eye = vec3(-3.0, 2.6, -3.0)+sin(iTime*0.3);
     vec3 dir = vec3(0.3, 0.0, 0.3) - eye;
     vec3 up = vec3(0, 1, 0);
     float focal_length = .5;
@@ -59,10 +75,14 @@ vec3 render()
     cameraCoords(dir, up, cam);
     ray r = cameraGenerateRay(uv, eye, cam, focal_length);
 
+    vec2 uv2 = (gl_FragCoord.xy/iResolution.xy-0.5)+0.3;
+
     // Ray trace
-    vec3 col = skyColor();
+    vec3 col = skyColor(uv2);
     vec3 hit_loc = vec3(0.0);
     float t;
+
+    //float fog = horizonFog(0.5, 0.5, 0.5, 0.5);
 
     if (castRay(r, t)) {
         col = terrainColor(r, t);
@@ -70,7 +90,6 @@ vec3 render()
             col = shade(vec3(r.origin + r.direction * t), settings(GRID));
         }
     }
-
     return pow(col, vec3(1.0 / 2.2));
 }
 
