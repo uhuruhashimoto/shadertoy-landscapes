@@ -44,7 +44,7 @@ float fbm( in vec2 x, in float H )
 // plane height
 float f(float x, float z) {
     return fbm(vec2(x,z), 1.);
-    //return 0.5*snoise(vec2(x,z));
+    //return snoise(vec2(x,z));
     return 0.5 * sin(x)*sin(z);
 }
 
