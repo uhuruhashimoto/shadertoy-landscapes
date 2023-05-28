@@ -1,5 +1,5 @@
 #define EPSILON 1e-3
-#define OCTAVES 2
+#define OCTAVES 1
 
 struct ray
 {
@@ -64,7 +64,7 @@ vec3 skyColor(const ray r, float t) {
 
 // sum fractal noise
 // plane height
-float f(in vec2 p) {
+float terrainH(in vec2 p) {
     //return 2.0;
     const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
     float f = 0.0;
@@ -79,11 +79,12 @@ float f(in vec2 p) {
 
 
 // The normal can be computed as usual with the central differences method:
-vec3 getNormal( const vec3 p )
+vec3 getNormal( const vec3 pos, float t)
 {
-    return normalize( vec3( f(vec2(p.x-EPSILON,p.z)) - f(vec2(p.x+EPSILON,p.z)),
-                            2.0f*EPSILON,
-                            f(vec2(p.x,p.z-EPSILON)) - f(vec2(p.x,p.z+EPSILON)) ) );
+    vec2  eps = vec2( 0.001*t, 0.0 );
+    return normalize( vec3( terrainH(pos.xz-eps.xy) - terrainH(pos.xz+eps.xy),
+                            2.0*eps.x,
+                            terrainH(pos.xz-eps.yx) - terrainH(pos.xz+eps.yx) ) );
 }
 
 vec3 getShading(vec3 p, vec3 n)
@@ -107,7 +108,7 @@ vec3 applyFog(vec3 p, float t)
 vec3 terrainColor( const ray r, float t )
 {
     vec3 p = r.origin + r.direction * t;
-    vec3 n = getNormal( p );
+    vec3 n = getNormal(p, t);
     vec3 s = getShading( p, n );
     vec3 m = getMaterial( p, n );
     return applyFog( m * s, t );
@@ -124,7 +125,7 @@ bool castRay(ray r, inout float resT)
     for( float t = mint; t < maxt; t += dt )
     {
         vec3  p = r.origin + r.direction*t;
-        float h = f(p.xz);
+        float h = terrainH(p.xz);
         if( p.y < h )
         {
             // interpolate the intersection distance
@@ -149,21 +150,8 @@ vec3 rayColor(ray r)
     return skyColor(r, t);
 }
 
-vec3 shade(vec3 p)
-{
-    vec3 light_pos = vec3(0.0, 5.0, 0.0);
-    vec3 light_intensity = vec3(5.0);
-    vec3 surface_color = vec3(0.5);
-    vec3 l = normalize(light_pos - p);
-    vec3 n = getNormal(p);
-    float distance = length(light_pos - p);
-    float costheta = max(dot(n, l), 0.0);
-    float attentuation = 1.0 / (distance * distance);
-    surface_color = costheta * attentuation * light_intensity * surface_color;
-    return surface_color;
-}
 
-vec3 render()
+void mainImage(out vec4 fragColor, in vec2 fragCoord )
 {
     // get the location on the screen in [-1,1] space after
     // accounting for the aspect ratio
@@ -178,7 +166,7 @@ vec3 render()
     vec3 eye = vec3(-3.0, 2.6, -3.0);
     vec3 dir = vec3(0.3, 0.0, 0.3) - eye;
     vec3 up = vec3(0, 1, 0);
-    float focal_length = .5;
+    float focal_length = 1./4.;
     camera cam;
     cameraCoords(dir, up, cam);
     ray r = cameraGenerateRay(uv, eye, cam, focal_length);
@@ -187,11 +175,7 @@ vec3 render()
     vec3 col = rayColor(r);
 
     // gamma correction
-    return pow(col, vec3(1.0 / 2.2));
-}
+    col = pow(col, vec3(1.0 / 2.2));
 
-void mainImage(out vec4 fragColor, in vec2 fragCoord )
-{
-    fragColor = vec4(render(), 1.0);
-
+    fragColor = vec4(col, 1.0);
 }
