@@ -19,15 +19,21 @@ vec2 hash( vec2 p ) // replace this by something better
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
-vec2 hash21(float p) {
-  vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
+float hash12(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * .1031);
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.x + p3.y) * p3.z);
+}
+
+vec2 hash22(vec2 p) {
+  vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
   p3 += dot(p3, p3.yzx + 33.33);
   return fract((p3.xx + p3.yz) * p3.zy);
 }
 
 float noise( in vec2 p )
 {
-    return hash21(p);
+    //return hash12(p);
 
 
     const float K1 = 0.366025404; // (sqrt(3)-1)/2;
@@ -40,7 +46,7 @@ float noise( in vec2 p )
     vec2  b = a - o + K2;
 	vec2  c = a - 1.0 + 2.0*K2;
     vec3  h = max( 0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
-	vec3  n = h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
+	vec3  n = h*h*h*h*vec3( dot(a,hash22(i+0.0)), dot(b,hash22(i+o)), dot(c,hash22(i+1.0)));
     return dot( n, vec3(70.0) );
 }
 
