@@ -16,6 +16,9 @@ Grateful credit is given to [Inigo Quilez](https://iquilezles.org/).
 [terrain marching](https://iquilezles.org/articles/terrainmarching/)
 [fbm](https://iquilezles.org/articles/fbm/)
 [derivatives of noise](https://iquilezles.org/articles/morenoise/)
+[soft shadow](https://iquilezles.org/articles/rmshadows)
+[fog](https://iquilezles.org/articles/fog)
+[lighting](https://iquilezles.org/articles/outdoorslighting)
 
 ### Youtube Tutorials
 [painting a landscape with maths](https://www.youtube.com/watch?v=BFld4EBO2RE)
