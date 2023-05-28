@@ -1,12 +1,4 @@
 #define EPSILON 1e-3
-#define MAX_FLOAT 3.402823466e+38
-#define MAX_RECURSION 50
-#define GRID 1
-#define DIFFUSE 2
-struct settings
-{
-    int shade_mode;    // How the primiive is being visualized (GRID or COST)
-};
 
 struct ray
 {
@@ -58,31 +50,29 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
 }
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
-vec3 skyColor() {
-    return vec3(0.0, 0.0, 0.3);
+vec3 skyColor(const ray r, float t) {
+    vec3 p = r.origin + r.direction * t;
+    vec3 col = vec3(0.3,0.5,0.85);
+    return mix( col, 0.85*vec3(0.7,0.75,0.85), pow( 1.0-max(r.direction.y,0.0), 4.0 ) );
 }
 
 // fractional brownian motion from https://iquilezles.org/articles/fbm/
-float fbm( in vec2 x, in float H )
+float fbm( in vec2 p)
 {
-    float G = exp2(-H);
-    float f = 1.0;
-    float a = 1.0;
-    float t = 0.0;
-    int numOctaves = 1;
-    for( int i=0; i<numOctaves; i++ )
-    {
-        t += a*noise(f*x);
-        f *= 2.0;
-        a *= G;
-    }
-    return t;
+    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8);
+    float f = 0.0;
+    f += 0.5000*noise(p); p = m2*p*2.02;
+    //f += 0.2500*noise(p); p = m2*p*2.03;
+    //f += 0.1250*noise(p); p = m2*p*2.01;
+    //f += 0.0625*noise(p);
+    return f/0.9375;
 }
 
 
 // plane height
 float f(float x, float z) {
-    return fbm(vec2(x,z), 1.);
+    return 2.0;
+    //return fbm(vec2(x,z));
 }
 
 // The normal can be computed as usual with the central differences method:
@@ -152,35 +142,21 @@ vec3 rayColor(ray r)
     if (castRay(r, t)) {
         return terrainColor(r, t);
     }
-    return skyColor();
+    return skyColor(r, t);
 }
 
-vec3 shade(vec3 p, settings setts)
+vec3 shade(vec3 p)
 {
-    if (setts.shade_mode == GRID) {
-        float res = 0.2;
-        float one = abs(mod(p.x, res) - res / 2.0);
-        float two = abs(mod(p.y, res) - res / 2.0);
-        float three = abs(mod(p.z, res) - res / 2.0);
-        float interp = min(one, min(two, three)) / res;
-
-        return mix(vec3(0.2, 0.5, 1.0), vec3(0.1, 0.1, 0.1), smoothstep(0.0, 0.05, abs(interp)));
-    }
-    else if (setts.shade_mode == DIFFUSE) {
-        vec3 light_pos = vec3(0.0, 5.0, 0.0);
-        vec3 light_intensity = vec3(5.0);
-        vec3 surface_color = vec3(0.5);
-        vec3 l = normalize(light_pos - p);
-        vec3 n = getNormal(p);
-        float distance = length(light_pos - p);
-        float costheta = max(dot(n, l), 0.0);
-        float attentuation = 1.0 / (distance * distance);
-        surface_color = costheta * attentuation * light_intensity * surface_color;
-        return surface_color;
-    }
-    else {
-        return vec3(0.0);
-    }
+    vec3 light_pos = vec3(0.0, 5.0, 0.0);
+    vec3 light_intensity = vec3(5.0);
+    vec3 surface_color = vec3(0.5);
+    vec3 l = normalize(light_pos - p);
+    vec3 n = getNormal(p);
+    float distance = length(light_pos - p);
+    float costheta = max(dot(n, l), 0.0);
+    float attentuation = 1.0 / (distance * distance);
+    surface_color = costheta * attentuation * light_intensity * surface_color;
+    return surface_color;
 }
 
 vec3 render()
@@ -204,14 +180,7 @@ vec3 render()
     ray r = cameraGenerateRay(uv, eye, cam, focal_length);
 
     // Ray trace
-    vec3 col = skyColor();
-    vec3 hit_loc = vec3(0.0);
-    float t;
-
-    if (castRay(r, t)) {
-        col = terrainColor(r, t);
-    }
-
+    vec3 col = rayColor(r);
     return pow(col, vec3(1.0 / 2.2));
 }
 
