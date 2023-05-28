@@ -19,8 +19,17 @@ vec2 hash( vec2 p ) // replace this by something better
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
+vec2 hash21(float p) {
+  vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
+  p3 += dot(p3, p3.yzx + 33.33);
+  return fract((p3.xx + p3.yz) * p3.zy);
+}
+
 float noise( in vec2 p )
 {
+    return hash21(p);
+
+
     const float K1 = 0.366025404; // (sqrt(3)-1)/2;
     const float K2 = 0.211324865; // (3-sqrt(3))/6;
 
@@ -50,6 +59,7 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
 }
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
+// sky mixing values from https://www.shadertoy.com/view/MdX3Rr
 vec3 skyColor(const ray r, float t) {
     vec3 p = r.origin + r.direction * t;
     vec3 col = vec3(0.3,0.5,0.85);
@@ -59,10 +69,18 @@ vec3 skyColor(const ray r, float t) {
 // fractional brownian motion from https://iquilezles.org/articles/fbm/
 float fbm( in vec2 p)
 {
-    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8);
+    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
     float f = 0.0;
-    f += 0.5000*noise(p); p = m2*p*2.02;
-    //f += 0.2500*noise(p); p = m2*p*2.03;
+
+    // octave 1
+    f += 0.5000*noise(p); 
+    p = m2*p*2.02;
+
+    // octave 2
+    //f += 0.2500*noise(p); 
+    //p = m2*p*2.03;
+
+    // octave 3
     //f += 0.1250*noise(p); p = m2*p*2.01;
     //f += 0.0625*noise(p);
     return f/0.9375;
@@ -71,8 +89,8 @@ float fbm( in vec2 p)
 
 // plane height
 float f(float x, float z) {
-    return 2.0;
-    //return fbm(vec2(x,z));
+    //return 2.0;
+    return fbm(vec2(x,z));
 }
 
 // The normal can be computed as usual with the central differences method:
