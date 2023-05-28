@@ -20,7 +20,7 @@ vec2 hash( vec2 p ) // replace this by something better
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
-float noise( in vec2 p )
+vec3 vnoise( in vec2 p )
 {
     const float K1 = 0.366025404; // (sqrt(3)-1)/2;
     const float K2 = 0.211324865; // (3-sqrt(3))/6;
@@ -33,23 +33,11 @@ float noise( in vec2 p )
 	vec2  c = a - 1.0 + 2.0*K2;
     vec3  h = max( 0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
 	vec3  n = h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
-    return dot( n, vec3(70.0) );
+    return n;
 }
 
-vec3 noise3( in vec2 p )
-{
-    const float K1 = 0.366025404; // (sqrt(3)-1)/2;
-    const float K2 = 0.211324865; // (3-sqrt(3))/6;
-
-	vec2  i = floor( p + (p.x+p.y)*K1 );
-    vec2  a = p - i + (i.x+i.y)*K2;
-    float m = step(a.y,a.x); 
-    vec2  o = vec2(m,1.0-m);
-    vec2  b = a - o + K2;
-	vec2  c = a - 1.0 + 2.0*K2;
-    vec3  h = max( 0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
-	vec3  n = h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
-    return n;
+float noise(in vec2 p) {
+    return dot(vnoise(p), vec3(70.0) );
 }
 
 // ---------------------- CAMERA ------------------------ //
@@ -74,26 +62,6 @@ vec3 skyColor(const ray r, float t) {
     return mix( col, 0.85*vec3(0.7,0.75,0.85), pow( 1.0-max(r.direction.y,0.0), 4.0 ) );
 }
 
-// fractional brownian motion from https://iquilezles.org/articles/fbm/
-float fbm( in vec2 p)
-{
-    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
-    float f = 0.0;
-
-    // octave 1
-    f += 0.5000*noise(p); 
-    p = m2*p*2.02;
-
-    // octave 2
-    //f += 0.2500*noise(p); 
-    //p = m2*p*2.03;
-
-    // octave 3
-    //f += 0.1250*noise(p); p = m2*p*2.01;
-    //f += 0.0625*noise(p);
-    return f/0.9375;
-}
-
 // sum fractal noise
 // plane height
 float f(in vec2 p) {
@@ -101,37 +69,13 @@ float f(in vec2 p) {
     const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
     float f = 0.0;
     float c = 1.0;
-    vec2 d = vec2(0.0);
     for (int i=0; i<OCTAVES; i++) {
-        vec3 n = noise3(p);
-        d += n.yz;
-        f += c * n.x / (1. + dot(d, d));
+        f += c * noise(m2 * p * 2.0);
         c *= 0.5;
         p = m2 * p * 2.0;
     }
     return f;
 }
-
-// float f( in vec2 x)
-// {
-//     const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
-// 	vec2  p = x*0.003/250.;
-//     float a = 0.0;
-//     float b = 1.0;
-// 	vec2  d = vec2(0.0);
-//     for( int i=0; i<3; i++ )
-//     {
-//         vec3 n = noised(p);
-//         d += n.yz;
-//         a += b*n.x/(1.0+dot(d,d));
-// 		b *= 0.5;
-//         p = m2*p*2.0;
-//     }
-//     return a;
-
-//     a *= 0.9;
-// 	return 250.*120.0*a;
-// }
 
 
 // The normal can be computed as usual with the central differences method:
@@ -162,7 +106,6 @@ vec3 applyFog(vec3 p, float t)
 
 vec3 terrainColor( const ray r, float t )
 {
-    return vec3(0.0);
     vec3 p = r.origin + r.direction * t;
     vec3 n = getNormal( p );
     vec3 s = getShading( p, n );
