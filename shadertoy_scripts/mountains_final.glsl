@@ -48,6 +48,26 @@ float noise(in vec2 p) {
     return dot(vnoise(p), vec3(70.0) );
 }
 
+// fractional brownian motion from https://iquilezles.org/articles/fbm/
+float fbm( in vec2 p)
+{
+    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
+    float f = 0.0;
+
+    // octave 1
+    f += 0.5*noise(p);
+    p = m2*p*2.02;
+
+    // octave 2
+    f += 0.2500*noise(p);
+    p = m2*p*2.03;
+
+    // octave 3
+    //f += 0.1250*noise(p); p = m2*p*2.01;
+    //f += 0.0625*noise(p);
+    return f/0.9375;
+}
+
 // ---------------------- CAMERA ------------------------ //
 ray cameraGenerateRay(vec2 uv, vec3 eye, camera cam, float focal_length)
 {
@@ -126,7 +146,15 @@ vec3 getShading(ray r, vec3 p, vec3 n)
 {
     //sun
     if (sh(p)) {
+        // rock
         vec3 rock = vec3(1.0, 0.5, 0.2);
+        // snow
+        float h = smoothstep(55.0,80.0,p.y + 25.0*fbm(0.01*p.xz) );
+        float e = smoothstep(1.0-0.5*h,1.0-0.1*h,n.y);
+        float o = 0.3 + 0.7*smoothstep(0.0,0.1,n.x+h*h);
+        float s = h*e*o;
+        vec3 col = mix( rock, 0.29*vec3(0.62,0.65,0.7), smoothstep( 0.1, 0.9, s ) );
+        // light
         float amb = clamp(0.5+0.5*n.y,0.0,1.0);
 		float dif = clamp( dot( rock, n ), 0.0, 1.0 );
 		float bac = clamp( 0.2 + 0.8*dot( normalize( vec3(-rock.x, 0.0, rock.z ) ), n ), 0.0, 1.0 );
