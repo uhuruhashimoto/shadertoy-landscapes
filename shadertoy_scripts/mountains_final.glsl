@@ -1,5 +1,5 @@
 #define EPSILON 1e-3
-#define MAX_FLOAT 3.402823466e+38
+#define MAX_T 10.0
 #define OCTAVES 10
 #define MAX_DEPTH 200
 #define STEP_SIZE 0.5
@@ -133,33 +133,30 @@ vec3 terrainColor( const ray r, float t )
 }
 
 // ---------------------- RAY TRACE ------------------------ //
-bool castRay(ray r, inout float tout, float tmin, float tmax)
+float castRay(ray r, float tmin, float tmax)
 {
     float t = tmin;
     for (int i=0; i<MAX_DEPTH; i++) {
         vec3 pos = r.origin + r.direction*t;
         // evaluate height away fom plane
         float h = pos.y - terrainH(pos.xz);
-        if (abs(h) < EPSILON*t) {
-            tout = t;
-            return true;
+        if ((abs(h) < 0.0015*t) || (t > tmax)) {
+            break;
         }
         t += STEP_SIZE*h;
     }
-    return false;
+    return t;
 }
 
 vec3 rayColor(ray r)
 {
-    float t;
-    if (castRay(r, t, EPSILON, MAX_FLOAT)) {
-        if (t < 30.0) {
-            return terrainColor(r, t);
-        } else {
-            return vec3(0.0);
-        }
+    float t = castRay(r, EPSILON, MAX_T);
+    if (t >= MAX_T) {
+        return skyColor(r, t);
+    } else {
+        return terrainColor(r, t);
     }
-    return skyColor(r, t);
+    return vec3(1.0, 0.0, 0.0);
 }
 
 
