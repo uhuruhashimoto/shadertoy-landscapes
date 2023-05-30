@@ -1,5 +1,5 @@
 #define EPSILON 1e-3
-#define MAX_T 5.0
+#define MAX_T 10.0
 #define OCTAVES 10
 #define MAX_DEPTH 200
 #define STEP_SIZE 0.5
@@ -126,9 +126,14 @@ vec3 getShading(ray r, vec3 p, vec3 n)
 {
     //sun
     if (sh(p)) {
+        vec3 rock = vec3(1.0, 0.5, 0.2);
+        float amb = clamp(0.5+0.5*n.y,0.0,1.0);
+		float dif = clamp( dot( rock, n ), 0.0, 1.0 );
+		float bac = clamp( 0.2 + 0.8*dot( normalize( vec3(-rock.x, 0.0, rock.z ) ), n ), 0.0, 1.0 );
+        return vec3(amb*bac*0.05);
+        return n * vec3(0.1);
         return vec3(0.0);
     }
-    //return n;
     return vec3(dot(n, sun));
 }
 
