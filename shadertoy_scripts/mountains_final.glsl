@@ -131,10 +131,8 @@ vec3 getShading(ray r, vec3 p, vec3 n)
 		float dif = clamp( dot( rock, n ), 0.0, 1.0 );
 		float bac = clamp( 0.2 + 0.8*dot( normalize( vec3(-rock.x, 0.0, rock.z ) ), n ), 0.0, 1.0 );
         return vec3(amb*bac*0.05);
-        return n * vec3(0.1);
-        return vec3(0.0);
     }
-    return vec3(dot(n, sun));
+    return vec3(dot(n, sun))+0.5;
 }
 
 vec3 getMaterial(vec3 p, vec3 n)
@@ -144,8 +142,11 @@ vec3 getMaterial(vec3 p, vec3 n)
 
 vec3 applyFog(vec3 p, float t)
 {
-    // no fog yet
-    return p;
+    // fog interpolation courtesy of Inigo Quilez, similar to
+    // https://www.shadertoy.com/view/MdX3Rr
+     float fo = 1.0-exp(-pow(0.3*t,1.5) );
+     vec3 fco = 0.65*vec3(0.4,0.65,1.0);
+     return mix(p, fco, fo);
 }
 
 vec3 terrainColor( const ray r, float t )
