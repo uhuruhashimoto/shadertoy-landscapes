@@ -18,6 +18,8 @@ struct camera {
     vec3 w;
 };
 
+const vec3 sun = vec3(1.0, 0.5, 0);
+
 // ---------------------- RANDOMNESS ------------------------ //
 vec2 hash( vec2 p ) // replace this by something better
 {
@@ -27,17 +29,6 @@ vec2 hash( vec2 p ) // replace this by something better
 
 vec3 vnoise( in vec2 p )
 {
-    // vec2 f = fract(x);
-    // vec2 u = f*f*(3.0-2.0*f);
-    // vec2 du = 6.0*f*(1.0-f);
-    // vec3 col = vec3(1.0, 0.5, 0.2);
-    // float a = col.x;
-    // float b = col.y;
-    // float c = col.z;
-    // float d = 0.0;
-    // return vec3(a+(b-a)*u.x+(c-a)*u.y+(a-b-c+d)*u.x*u.y,
-	// 			du*(vec2(b-a,c-a)+(a-b-c+d)*u.yx));
-
 
     const float K1 = 0.366025404; // (sqrt(3)-1)/2;
     const float K2 = 0.211324865; // (3-sqrt(3))/6;
@@ -123,9 +114,8 @@ float castRay(ray r, float tmin, float tmax)
 }
 
 bool sh(vec3 p) {
-    vec3 s = vec3(1.0, 0.5, 0);
-    ray r = ray(p, s);
-    float t = castRay(r, EPSILON, 5.0);
+    ray r = ray(p, sun);
+    float t = castRay(r, EPSILON, MAX_T);
     if (t >= MAX_T) {
         return false;
     }
@@ -138,9 +128,8 @@ vec3 getShading(ray r, vec3 p, vec3 n)
     if (sh(p)) {
         return vec3(0.0);
     }
-    return n;
-    vec3 s = vec3(1.0, 0.5, 0);
-    return vec3(dot(n, s));
+    //return n;
+    return vec3(dot(n, sun));
 }
 
 vec3 getMaterial(vec3 p, vec3 n)
