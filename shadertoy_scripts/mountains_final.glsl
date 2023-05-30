@@ -18,7 +18,7 @@ struct camera {
     vec3 w;
 };
 
-const vec3 sun = vec3(1.0, 0.5, 0);
+const vec3 sun = vec3(0.85, 0.5, 0);
 
 // ---------------------- RANDOMNESS ------------------------ //
 vec2 hash( vec2 p ) // replace this by something better
