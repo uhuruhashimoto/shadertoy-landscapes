@@ -1,5 +1,5 @@
 #define EPSILON 1e-3
-#define MAX_T 10.0
+#define MAX_T 5.0
 #define OCTAVES 10
 #define MAX_DEPTH 200
 #define STEP_SIZE 0.5
@@ -72,6 +72,7 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
     cam.w = 20.*cam.w;
 }
 
+
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
 // sky mixing values from https://www.shadertoy.com/view/MdX3Rr
 vec3 skyColor(const ray r, float t) {
@@ -105,10 +106,40 @@ vec3 getNormal( const vec3 pos, float t)
                             terrainH(pos.xz-eps.yx) - terrainH(pos.xz+eps.yx) ) );
 }
 
-vec3 getShading(vec3 p, vec3 n)
+// RAY TRACING
+float castRay(ray r, float tmin, float tmax)
 {
-    // sun
-    vec3 s = vec3(1, 0.5, 0);
+    float t = tmin;
+    for (int i=0; i<MAX_DEPTH; i++) {
+        vec3 pos = r.origin + r.direction*t;
+        // evaluate height away fom plane
+        float h = pos.y - terrainH(pos.xz);
+        if ((abs(h) < 0.0015*t) || (t > tmax)) {
+            break;
+        }
+        t += STEP_SIZE*h;
+    }
+    return t;
+}
+
+bool sh(vec3 p) {
+    vec3 s = vec3(1.0, 0.5, 0);
+    ray r = ray(p, s);
+    float t = castRay(r, EPSILON, 5.0);
+    if (t >= MAX_T) {
+        return false;
+    }
+    return true;
+}
+
+vec3 getShading(ray r, vec3 p, vec3 n)
+{
+    //sun
+    if (sh(p)) {
+        return vec3(0.0);
+    }
+    return n;
+    vec3 s = vec3(1.0, 0.5, 0);
     return vec3(dot(n, s));
 }
 
@@ -127,27 +158,12 @@ vec3 terrainColor( const ray r, float t )
 {
     vec3 p = r.origin + r.direction * t;
     vec3 n = getNormal(p, t);
-    vec3 s = getShading( p, n );
+    vec3 s = getShading( r, p, n );
     vec3 m = getMaterial( p, n );
     return applyFog( m * s, t );
 }
 
 // ---------------------- RAY TRACE ------------------------ //
-float castRay(ray r, float tmin, float tmax)
-{
-    float t = tmin;
-    for (int i=0; i<MAX_DEPTH; i++) {
-        vec3 pos = r.origin + r.direction*t;
-        // evaluate height away fom plane
-        float h = pos.y - terrainH(pos.xz);
-        if ((abs(h) < 0.0015*t) || (t > tmax)) {
-            break;
-        }
-        t += STEP_SIZE*h;
-    }
-    return t;
-}
-
 vec3 rayColor(ray r)
 {
     float t = castRay(r, EPSILON, MAX_T);
