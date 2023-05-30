@@ -1,8 +1,10 @@
 #define EPSILON 1e-3
 #define MAX_FLOAT 3.402823466e+38
-#define OCTAVES 1
-#define MAX_DEPTH 300
+#define OCTAVES 3
+#define MAX_DEPTH 100
 #define STEP_SIZE 0.4
+#define SAMPLES 1
+#define SC 250.0
 
 
 struct ray
@@ -24,13 +26,7 @@ vec2 hash( vec2 p ) // replace this by something better
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
-vec3 hash32(vec2 p) {
-  vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
-  p3 += dot(p3, p3.yxz + 33.33);
-  return fract((p3.xxy + p3.yzz) * p3.zyx);
-}
-
-vec3 vnoise( in vec2 x )
+vec3 vnoise( in vec2 p )
 {
     // vec2 f = fract(x);
     // vec2 u = f*f*(3.0-2.0*f);
@@ -44,7 +40,6 @@ vec3 vnoise( in vec2 x )
 	// 			du*(vec2(b-a,c-a)+(a-b-c+d)*u.yx));
 
 
-
     const float K1 = 0.366025404; // (sqrt(3)-1)/2;
     const float K2 = 0.211324865; // (3-sqrt(3))/6;
 
@@ -55,7 +50,7 @@ vec3 vnoise( in vec2 x )
     vec2  b = a - o + K2;
 	vec2  c = a - 1.0 + 2.0*K2;
     vec3  h = max( 0.5-vec3(dot(a,a), dot(b,b), dot(c,c) ), 0.0 );
-	vec3  n = h*h*h*h*vec3( dot(a,hash32(i+0.0)), dot(b,hash32(i+o)), dot(c,hash32(i+1.0)));
+	vec3  n = h*h*h*h*vec3( dot(a,hash(i+0.0)), dot(b,hash(i+o)), dot(c,hash(i+1.0)));
     return n;
 }
 
@@ -75,6 +70,7 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
     cam.w = -normalize(dir);
     cam.u = normalize(cross(up, cam.w));
     cam.v = cross(cam.w, cam.u);
+    cam.w = 0.5*cam.w;
 }
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
@@ -87,7 +83,8 @@ vec3 skyColor(const ray r, float t) {
 
 // sum fractal noise
 // plane height
-float terrainH(in vec2 p) {
+float terrainH(in vec2 x) {
+    vec2 p = x; //*0.003/SC;
     //return 2.0;
     const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
     float f = 0.0;
@@ -97,7 +94,7 @@ float terrainH(in vec2 p) {
         c *= 0.5;
         p = m2 * p * 2.0;
     }
-    return f;
+    return 0.2*f;
 }
 
 
@@ -176,7 +173,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord )
     uv.x *= aspect;
 
     // Camera
-    vec3 eye = vec3(-3.0, 2.6, -3.0);
+    vec3 eye = vec3(-3.0, 2.0, -3.0);
     vec3 dir = vec3(0.3, 0.0, 0.3) - eye;
     vec3 up = vec3(0, 1, 0);
     float focal_length = 1./4.;
@@ -185,10 +182,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord )
     ray r = cameraGenerateRay(uv, eye, cam, focal_length);
 
     // Ray trace
-    vec3 col = rayColor(r);
+    vec3 col;
+    for (int i =0; i<SAMPLES; i++) {
+        col = rayColor(r);
+    }
 
     // gamma correction
-    col = pow(col, vec3(1.0 / 2.2));
+    col = sqrt(col);
 
     fragColor = vec4(col, 1.0);
 }
