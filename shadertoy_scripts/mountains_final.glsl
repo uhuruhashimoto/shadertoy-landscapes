@@ -1,10 +1,9 @@
 #define EPSILON 1e-3
 #define MAX_FLOAT 3.402823466e+38
-#define OCTAVES 3
-#define MAX_DEPTH 100
-#define STEP_SIZE 0.4
+#define OCTAVES 10
+#define MAX_DEPTH 200
+#define STEP_SIZE 0.5
 #define SAMPLES 1
-#define SC 250.0
 
 
 struct ray
@@ -70,7 +69,7 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
     cam.w = -normalize(dir);
     cam.u = normalize(cross(up, cam.w));
     cam.v = cross(cam.w, cam.u);
-    cam.w = 0.5*cam.w;
+    cam.w = 20.*cam.w;
 }
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
@@ -84,8 +83,7 @@ vec3 skyColor(const ray r, float t) {
 // sum fractal noise
 // plane height
 float terrainH(in vec2 x) {
-    vec2 p = x; //*0.003/SC;
-    //return 2.0;
+    vec2 p = x;
     const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
     float f = 0.0;
     float c = 1.0;
@@ -155,7 +153,11 @@ vec3 rayColor(ray r)
 {
     float t;
     if (castRay(r, t, EPSILON, MAX_FLOAT)) {
-        return terrainColor(r, t);
+        if (t < 30.0) {
+            return terrainColor(r, t);
+        } else {
+            return vec3(0.0);
+        }
     }
     return skyColor(r, t);
 }
@@ -173,7 +175,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord )
     uv.x *= aspect;
 
     // Camera
-    vec3 eye = vec3(-3.0, 2.0, -3.0);
+    vec3 eye = vec3(-10.2, 0.19, -3.0);
     vec3 dir = vec3(0.3, 0.0, 0.3) - eye;
     vec3 up = vec3(0, 1, 0);
     float focal_length = 1./4.;
