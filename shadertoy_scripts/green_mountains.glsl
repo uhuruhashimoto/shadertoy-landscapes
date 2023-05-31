@@ -90,7 +90,13 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
 vec3 skyColor(const ray r, float t) {
     vec3 p = r.origin + r.direction * t;
     vec3 col = vec3(0.3,0.5,0.85);
-    return mix( col, 0.85*vec3(0.7,0.75,0.85), pow( 1.0-max(r.direction.y,0.0), 4.0 ) );
+
+    // sun
+    float s = clamp(dot(sun, r.direction), 0.0, 1.0);
+    col += 200.*sun*pow(s, 32.0);
+
+    // blue
+    return mix( col, 0.85*vec3(0.7,0.75,0.75), pow( 1.0-max(r.direction.y,0.0), 4.0 ) );
 }
 
 // sum fractal noise
