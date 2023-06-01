@@ -3,7 +3,7 @@
 Uhuru Hashimoto
 Jemely Robles
 
-This repository is for the development of a landscape series, for the final Computer Graphics project. The landscapes are implemented using different noise functions. The entry point is a file called `plane`, which can be tested with the [shadertoy extension](https://github.com/stevensona/shader-toy/blob/master/package.json).
+This repository is for the development of a landscape series, for the final Computer Graphics project. The landscapes are implemented using fractal noise to create the mountains, fractional brownian motion to add snow, and distance-related raymarching for shadows. The entry point is the subdirectory `shadertoy_scripts`, which can be run on the [shadertoy website](shadertoy.com/). The original entrypoint is a file called `plane`, which can be tested with the [shadertoy extension](https://github.com/stevensona/shader-toy/blob/master/package.json).
 
 ## Sources
 
