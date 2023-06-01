@@ -63,8 +63,8 @@ float fbm( in vec2 p)
     p = m2*p*2.03;
 
     // octave 3
-    //f += 0.1250*noise(p); p = m2*p*2.01;
-    //f += 0.0625*noise(p);
+    f += 0.1250*noise(p); p = m2*p*2.01;
+    f += 0.0625*noise(p);
     return f/0.9375;
 }
 
@@ -165,11 +165,11 @@ vec3 getShading(ray r, vec3 p, vec3 n)
 
 vec3 getMaterial(vec3 p, vec3 n)
 {
-    return vec3(1.0);
-    if (p.y > 0.17) {
-        return vec3(.0, .0, 1.0);
+    //return vec3(1.0);
+    if (p.y > 0.06 - 0.1*fbm(20.*p.xz) && n.y > 0.2) {
+        return vec3(1.0); // + vec3(noise(100.*p.xz));
     }
-    return vec3(1.0, 0.5, 0.2);
+    return mix(vec3(1.0), vec3(0.1, 0.1, 0.1), 1.0);
 }
 
 vec3 applyFog(vec3 p, float t)
