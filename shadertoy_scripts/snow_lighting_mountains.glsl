@@ -18,7 +18,7 @@ struct camera {
     vec3 w;
 };
 
-const vec3 sun = vec3(0.85, 0.5, 0);
+const vec3 sun = vec3(0.7, 0.5, 0);
 
 // ---------------------- RANDOMNESS ------------------------ //
 vec2 hash( vec2 p ) // replace this by something better
@@ -63,8 +63,8 @@ float fbm( in vec2 p)
     p = m2*p*2.03;
 
     // octave 3
-    //f += 0.1250*noise(p); p = m2*p*2.01;
-    //f += 0.0625*noise(p);
+    f += 0.1250*noise(p); p = m2*p*2.01;
+    f += 0.0625*noise(p);
     return f/0.9375;
 }
 
@@ -89,6 +89,8 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
 vec3 skyColor(const ray r, float t) {
     vec3 p = r.origin + r.direction * t;
     vec3 col = vec3(0.3,0.5,0.85);
+    float s = clamp(dot(sun, r.direction), 0.0, 1.0);
+    col += 2000.*sun*pow(s, 32.0);
     return mix( col, 0.85*vec3(0.7,0.75,0.85), pow( 1.0-max(r.direction.y,0.0), 4.0 ) );
 }
 
@@ -145,27 +147,25 @@ bool sh(vec3 p) {
 vec3 getShading(ray r, vec3 p, vec3 n)
 {
     //sun
-    if (sh(p)) {
+    if (sh(p) || (p.x >-8.)) {
         // rock
         vec3 rock = vec3(1.0, 0.5, 0.2);
-        // snow
-        float h = smoothstep(55.0,80.0,p.y + 25.0*fbm(0.01*p.xz) );
-        float e = smoothstep(1.0-0.5*h,1.0-0.1*h,n.y);
-        float o = 0.3 + 0.7*smoothstep(0.0,0.1,n.x+h*h);
-        float s = h*e*o;
-        vec3 col = mix( rock, 0.29*vec3(0.62,0.65,0.7), smoothstep( 0.1, 0.9, s ) );
         // light
         float amb = clamp(0.5+0.5*n.y,0.0,1.0);
 		float dif = clamp( dot( rock, n ), 0.0, 1.0 );
 		float bac = clamp( 0.2 + 0.8*dot( normalize( vec3(-rock.x, 0.0, rock.z ) ), n ), 0.0, 1.0 );
-        return vec3(amb*bac*0.05);
+        return vec3(amb*bac*0.15)+0.3*vec3(.5,.5,.5);
     }
     return vec3(dot(n, sun))+0.5;
 }
 
 vec3 getMaterial(vec3 p, vec3 n)
 {
-    return vec3(1.0, 0.5, 0.2);
+    //return vec3(1.0);
+    if (p.y > 0.06 - 0.1*fbm(20.*p.xz) && n.y > 0.2) {
+        return vec3(1.0); // + vec3(noise(100.*p.xz));
+    }
+    return mix(vec3(1.0), vec3(0.1, 0.1, 0.1), 1.0);
 }
 
 vec3 applyFog(vec3 p, float t)
