@@ -20,12 +20,31 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
 vec3 skyColor() {
-    return vec3(0.0, 0.0, 0.3);
+    return vec3(0.0, 0.0, 0.0);
 }
+
+// fractional brownian motion from https://iquilezles.org/articles/fbm/
+float fbm( in vec2 x, in float H )
+{
+    float G = exp2(-H);
+    float f = 1.0;
+    float a = 1.0;
+    float t = 0.0;
+    int numOctaves = 1;
+    for( int i=0; i<numOctaves; i++ )
+    {
+        t += a*snoise(f*x);
+        f *= 2.0;
+        a *= G;
+    }
+    return t;
+}
+
 
 // plane height
 float f(float x, float z) {
-    //return 1.+0.5*snoise(vec2(x,z));
+    return fbm(vec2(x,z), 1.);
+    //return snoise(vec2(x,z));
     return 0.5 * sin(x)*sin(z);
 }
 

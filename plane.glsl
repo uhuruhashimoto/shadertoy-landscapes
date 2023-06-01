@@ -1,13 +1,12 @@
 #iKeyboard
 #include "ray_trace.glsl"
-#include "random/perlin.glsl"
 #include "sdfs/sdf.glsl"
 
 #define GRID 1
 #define DIFFUSE 2
 struct settings
 {
-    int shade_mode;    // How the primiive is being visualized (GRID or COST)
+    int shade_mode;    // How the primitive is being visualized (GRID or COST)
 };
 
 
