@@ -65,16 +65,16 @@ vec3 skyColor(const ray r, float t) {
 // sum fractal noise
 // plane height
 float terrainH(in vec2 p) {
-    //return 2.0;
-    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
-    float f = 0.0;
-    float c = 1.0;
-    for (int i=0; i<OCTAVES; i++) {
-        f += c * noise(m2 * p * 2.0);
-        c *= 0.5;
-        p = m2 * p * 2.0;
-    }
-    return f;
+    return 2.0;
+    // const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
+    // float f = 0.0;
+    // float c = 1.0;
+    // for (int i=0; i<OCTAVES; i++) {
+    //     f += c * noise(m2 * p * 2.0);
+    //     c *= 0.5;
+    //     p = m2 * p * 2.0;
+    // }
+    // return f;
 }
 
 
