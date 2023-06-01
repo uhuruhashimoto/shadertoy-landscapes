@@ -20,7 +20,7 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
 vec3 skyColor() {
-    return vec3(0.0, 0.0, 0.3);
+    return vec3(0.0, 0.0, 0.0);
 }
 
 // fractional brownian motion from https://iquilezles.org/articles/fbm/

@@ -6,7 +6,7 @@
 #define DIFFUSE 2
 struct settings
 {
-    int shade_mode;    // How the primiive is being visualized (GRID or COST)
+    int shade_mode;    // How the primitive is being visualized (GRID or COST)
 };
 
 
