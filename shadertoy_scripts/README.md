@@ -6,4 +6,4 @@ can't handle the load reliably.
 
 Therefore, they have a lot of repeat code with small changes to save progress.
 
-For code to grade, please look at `snow_lighting_mountains.glsl` and `animated.glsl`.
+For code to grade, please look at `final.glsl`.
