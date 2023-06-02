@@ -1,3 +1,5 @@
+// Credit to Inigo Quilez - see top-level README for full credits.
+// See final.glsl for proper credit for all functions
 #define EPSILON 1e-3
 #define MAX_T 10.0
 #define OCTAVES 10
@@ -21,7 +23,7 @@ struct camera {
 const vec3 sun = vec3(0.7, 0.5, 0);
 
 // ---------------------- RANDOMNESS ------------------------ //
-vec2 hash( vec2 p ) // replace this by something better
+vec2 hash( vec2 p )
 {
 	p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
