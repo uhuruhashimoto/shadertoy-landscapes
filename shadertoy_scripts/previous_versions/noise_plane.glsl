@@ -1,3 +1,5 @@
+// Credit to Inigo Quilez - see top-level README for full credits.
+// See final.glsl for proper credit for all functions
 #define EPSILON 1e-3
 #define MAX_FLOAT 3.402823466e+38
 #define MAX_RECURSION 50

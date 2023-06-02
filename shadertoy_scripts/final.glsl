@@ -1,3 +1,5 @@
+// Credit to Inigo Quilez - see top-level README for full credits.
+
 #define EPSILON 1e-3
 #define MAX_T 10.0
 #define OCTAVES 10
@@ -21,17 +23,23 @@ struct camera {
 const vec3 sun = vec3(0.7, 0.5, 0);
 
 // ---------------------- RANDOMNESS ------------------------ //
-vec2 hash( vec2 p ) // replace this by something better
+// Simplex noise from Inigo Quilez (MIT license)
+// https://www.shadertoy.com/view/Msf3WH
+// some constants changed
+vec2 hash( vec2 p )
 {
 	p = vec2( dot(p,vec2(127.1,311.7)), dot(p,vec2(269.5,183.3)) );
 	return -1.0 + 2.0*fract(sin(p)*43758.5453123);
 }
 
+// Simplex noise from Inigo Quilez (MIT license)
+// https://www.shadertoy.com/view/Msf3WH
+// some constants changed
 vec3 vnoise( in vec2 p )
 {
 
-    const float K1 = 0.366025404; // (sqrt(3)-1)/2;
-    const float K2 = 0.211324865; // (3-sqrt(3))/6;
+    const float K1 = 0.366025404;
+    const float K2 = 0.211324865;
 
 	vec2  i = floor( p + (p.x+p.y)*K1 );
     vec2  a = p - i + (i.x+i.y)*K2;
@@ -48,10 +56,12 @@ float noise(in vec2 p) {
     return dot(vnoise(p), vec3(70.0) );
 }
 
-// fractional brownian motion from https://iquilezles.org/articles/fbm/
+// fractional brownian motion from Inigo Quilez
+// https://iquilezles.org/articles/fbm/
+// structure is his, code is my own
 float fbm( in vec2 p)
 {
-    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
+    const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //decimal rotation matrix
     float f = 0.0;
 
     // octave 1
@@ -59,12 +69,13 @@ float fbm( in vec2 p)
     p = m2*p*2.02;
 
     // octave 2
-    f += 0.2500*noise(p);
+    f += 0.25*noise(p);
     p = m2*p*2.03;
 
     // octave 3
-    f += 0.1250*noise(p); p = m2*p*2.01;
+    f += 0.125*noise(p); p = m2*p*2.01;
     f += 0.0625*noise(p);
+    // scale
     return f/0.9375;
 }
 
@@ -85,7 +96,9 @@ void cameraCoords(vec3 dir, vec3 up, inout camera cam)
 
 
 // ---------------------- LANDSCAPE INTERACTION ------------------------ //
-// sky mixing values from https://www.shadertoy.com/view/MdX3Rr
+// sky mixing values from Inigo Quilez
+// https://www.shadertoy.com/view/MdX3Rr
+// constants changed
 vec3 skyColor(const ray r, float t) {
     vec3 p = r.origin + r.direction * t;
     vec3 col = vec3(0.3,0.5,0.85);
@@ -96,6 +109,7 @@ vec3 skyColor(const ray r, float t) {
 
 // sum fractal noise
 // plane height
+// code is my own
 float terrainH(in vec2 x) {
     vec2 p = x;
     const mat2 m2 = mat2(0.8,-0.6,0.6,0.8); //rotation matrix
@@ -111,6 +125,8 @@ float terrainH(in vec2 x) {
 
 
 // The normal can be computed as usual with the central differences method:
+// Central Differences from Inigo Quilez
+// https://www.shadertoy.com/view/MdX3Rr
 vec3 getNormal( const vec3 pos, float t)
 {
     vec2  eps = vec2( 0.001*t, 0.0 );
@@ -135,6 +151,9 @@ float castRay(ray r, float tmin, float tmax)
     return t;
 }
 
+// shadow idea (trace ray to light source) from Inigo Quilez Landscape Tutorial
+// https://www.youtube.com/watch?v=BFld4EBO2RE&t=696s
+// implementation is my own
 bool sh(vec3 p) {
     ray r = ray(p, sun);
     float t = castRay(r, EPSILON, MAX_T);
@@ -161,17 +180,17 @@ vec3 getShading(ray r, vec3 p, vec3 n)
 
 vec3 getMaterial(vec3 p, vec3 n)
 {
-    //return vec3(1.0);
+    // snowcapped mountain tops with fbm
     if (p.y > 0.06 - 0.1*fbm(20.*p.xz) && n.y > 0.2) {
-        return vec3(1.0); // + vec3(noise(100.*p.xz));
+        return vec3(1.0);
     }
     return mix(vec3(1.0), vec3(0.1, 0.1, 0.1), 1.0);
 }
 
+// fog interpolation courtesy of Inigo Quilez, similar to
+// https://www.shadertoy.com/view/MdX3Rr
 vec3 applyFog(vec3 p, float t)
 {
-    // fog interpolation courtesy of Inigo Quilez, similar to
-    // https://www.shadertoy.com/view/MdX3Rr
      float fo = 1.0-exp(-pow(0.3*t,1.5) );
      vec3 fco = 0.65*vec3(0.4,0.65,1.0);
      return mix(p, fco, fo);
@@ -211,7 +230,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord )
     uv.x *= aspect;
 
     // Camera
-    vec3 eye = vec3(-10.2, 0.19, -3.0);
+    vec3 eye = vec3(-10.2, 0.19, -3.0) + 0.008*vec3(0, 0, iTime) + vec3(-1.0, 0, 0);
     vec3 dir = vec3(0.3, 0.0, 0.3) - eye;
     vec3 up = vec3(0, 1, 0);
     float focal_length = 1./4.;
